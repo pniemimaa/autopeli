@@ -2,6 +2,8 @@
 #include <avr/interrupt.h>
 #include "lcd.h"
 #include <string.h>
+#include <stdlib.h>
+#include <util/delay.h>
 
 
 //Funktioiden esittelyt
@@ -13,30 +15,34 @@ void piirra_naytto(void);
 #define PITUUS (16)
 
 char naytto [LEVEYS] [PITUUS]= {
-	{' ','_',' ','_',' ','_',' ','_',' ','<'},
-	{' ',' ',' ',' ',' ',' ',' ',' ',' ',' '}
+	{' ','_',' ','_',' ','_',' ','_',' ',' ',' ','_',' ','_',' ','<'},
+	{' ','_',' ','_',' ','_',' ','_',' ',' ',' ','_',' ','_',' ','_'}
 
 };
 
+
+typedef struct autopositio {
+	int kaista;
+	int kohta;
+} autopositio;
+
+autopositio ap = {0,15};
 int nakyy = 0;
 
 
 int main(void)
 {
-
+	
 	/* alusta laitteen komponentit */
 	alusta();
-
+	
 	while (1) {
-		if (nakyy)
-		{
-			lcd_write_ctrl(LCD_CLEAR);
-			nakyy = 0;
-		}
-		//Disabloidaan interruptit
-//		SREG &= ~(1 << 7);
+		
+		PORTA &= ~(1 << PA6);
 		lcd_write_ctrl(LCD_CLEAR);
+		tarkista_napit();
 		piirra_naytto();
+		_delay_ms(1000);
 		
 //		tarkista_napit();
 	}
@@ -48,17 +54,10 @@ void piirra_naytto()
 	for (x=0;x<16;x++)
 	{
 		lcd_gotoxy(x,y);
-		lcd_write_data((char)('0'+x));
+		lcd_write_data(naytto[y][x]);
 		
 	}
-	/*
-	for (x=0;x<LEVEYS;x++)
-	{
-		//lcd_gotoxy(0,x);
-		for (y=0;y<PITUUS;y++)
-			lcd_write_data(naytto [x][y]);
-		
-	}*/
+	
 
 }
 void alusta(void) {
@@ -108,43 +107,37 @@ void alusta(void) {
 void tarkista_napit()
 {
 	unsigned int masked;
-	char buf [40];
-	const int taulu[] = { 1,2,4,8,16 }; /* five lowest bits in PINA */
+	const int taulu[] = { 1,4,16 }; /* 0001 0101 */
 
 	// Zero everything above 5 lowest bits
 	masked = PINA & 31;
 	// Invert the bits (so that presses become 1:s...)
 	masked = ~(masked);
 
-	int i,count=0;
-	for (i=0;i<5;i++)
+	int i;
+	for (i=0;i<3;i++)
 	{
 		if (taulu[i] & masked)
 		{
-			count++;
+			switch(i) 
+			{
+			case 0:
+			//Oikealle kaistalle
+			PORTA |= (1 << PA6);
+			break;
+			case 1:
+			//keskinappi
+			//Hyppää
+			PORTA |= (1 << PA6);
+			break;
+			case 2:
+			//Vasemmalle kaistalle
+			PORTA |= (1 << PA6);
+			break;
+			}	
 		}
 	}
-	buf[6] = '\0';
-	if (count > 0)
-	{
-		/* Sallitaan keskeytykset */
-		SREG |= (1 << 7);
-		// rele päälle
-		PORTA |= (1 << PA6);
-		nakyy=1;
-		i=7;
-		lcd_write_ctrl(LCD_CLEAR);
-		while (i > -1)
-		{
-			char a = '0'+ (1 & (masked >> i));
-			lcd_write_data(a);
-			i--;
-		}
-		lcd_write_data(' ');
-		lcd_write_data(' ');
-	}
-	else
-		PORTA &= ~(1 << PA6);
+
 }
 
 ISR(TIMER1_COMPA_vect) {
