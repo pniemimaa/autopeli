@@ -15,7 +15,7 @@ void piirra_naytto(void);
 #define PITUUS (16)
 
 char naytto [LEVEYS] [PITUUS]= {
-	{' ','_',' ','_',' ','_',' ','_',' ',' ',' ','_',' ','_',' ','<'},
+	{' ','_',' ','_',' ','_',' ','_',' ',' ',' ','_',' ','_',' ','_'},
 	{' ','_',' ','_',' ','_',' ','_',' ',' ',' ','_',' ','_',' ','_'}
 
 };
@@ -40,6 +40,7 @@ int main(void)
 		
 		PORTA &= ~(1 << PA6);
 		lcd_write_ctrl(LCD_CLEAR);
+		vierita_nayttoa();
 		tarkista_napit();
 		piirra_naytto();
 		_delay_ms(1000);
@@ -47,9 +48,20 @@ int main(void)
 //		tarkista_napit();
 	}
 }
+
+void vierita_nayttoa()
+{
+	if (ap.kohta < 15)
+	{
+		naytto [ap.kaista] [ap.kohta] = ' ';
+		ap.kohta++;
+	}
+}
+
 void piirra_naytto()
 {
 	int x,y;
+	naytto [ap.kaista] [ap.kohta] = '<';
 	for (y=0;y<2;y++)
 	for (x=0;x<16;x++)
 	{
@@ -60,6 +72,25 @@ void piirra_naytto()
 	
 
 }
+
+void liikuta_autoa(int i)
+{
+	//tyhj‰‰ ed paikka
+	naytto [ap.kaista] [ap.kohta] = ' ';
+	switch(i)
+	{
+		case 0:
+		ap.kaista = (ap.kaista ? (ap.kaista-1) : 0);
+		break;
+		case 1:
+		ap.kohta = ( ((ap.kohta-2) >= 0) ? (ap.kohta-2) : 0);
+		break;
+		case 2:
+		ap.kaista = (ap.kaista ? 1 : (ap.kaista+1));
+		break;
+	}
+}
+
 void alusta(void) {
 
 	/* estet‰‰n kaikki keskeytykset */
@@ -124,15 +155,18 @@ void tarkista_napit()
 			case 0:
 			//Oikealle kaistalle
 			PORTA |= (1 << PA6);
+			liikuta_autoa(i);
 			break;
 			case 1:
 			//keskinappi
 			//Hypp‰‰
 			PORTA |= (1 << PA6);
+			liikuta_autoa(i);
 			break;
 			case 2:
 			//Vasemmalle kaistalle
 			PORTA |= (1 << PA6);
+			liikuta_autoa(i);
 			break;
 			}	
 		}
