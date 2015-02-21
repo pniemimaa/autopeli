@@ -99,3 +99,14 @@ wait(void)
   while (read_byte(0)&0x80)
     ;
 }
+
+// Move cursor to position x and y position for writing
+void lcd_gotoxy (unsigned char x, unsigned char y)
+{
+	if (y == 0)
+		lcd_write_ctrl(LCD_DDRAM | (LCD_START_LINE1+x));
+	else
+		lcd_write_ctrl(LCD_DDRAM | (LCD_START_LINE2+x));
+
+}
+

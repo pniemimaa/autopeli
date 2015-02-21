@@ -12,11 +12,14 @@
 #define LCD_FUNCTION  0x20  /* function set */
 #define LCD_CGRAM     0x40  /* set CGRAM address */
 #define LCD_DDRAM     0x80  /* set DDRAM address */
+#define LCD_START_LINE1 0x00 /* DDRAM address of first char of line1 */
+#define LCD_START_LINE2 0x40 /* DDRAM address of first char of line2 */
 
 /* function prototypes */
 void lcd_init(void);
 void lcd_write(int, int);
 int lcd_read(int);
+void lcd_gotoxy (unsigned char, unsigned char);
 
 /* macros to read/write control/data registers */
 #define lcd_write_ctrl(v) lcd_write(v,0)
