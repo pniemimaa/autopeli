@@ -15,8 +15,8 @@ void piirra_naytto(void);
 #define PITUUS (16)
 
 char naytto [LEVEYS] [PITUUS]= {
-	{' ','_',' ','_',' ','_',' ','_',' ',' ',' ','_',' ','_',' ','_'},
-	{' ','_',' ','_',' ','_',' ','_',' ',' ',' ','_',' ','_',' ','_'}
+	{' ','_',' ','_',' ','_',' ','_',' ','_',' ','_',' ','_',' ','_'},
+	{' ','_',' ','_',' ','_',' ','_',' ','_',' ','_',' ','_',' ','_'}
 
 };
 
@@ -26,18 +26,46 @@ typedef struct autopositio {
 	int kohta;
 } autopositio;
 
+typedef struct Este {
+	int kaista;
+	int kohta;
+	int tyyppi;} Este;
+
 autopositio ap = {0,15};
 int nakyy = 0;
+int matka = 0;
+volatile int este=0;
+volatile Este e2 = {0xFF,0xFF,0xFF};
 
+void tayta_tie(void)
+{
+	char a='_';
+	char b=' ';
+	int y,x;
+
+	if (matka % 2)
+	{
+		a=' ';
+		b='_';
+	}
+	for (y=0;y<LEVEYS;y++)
+	for (x=0;x<PITUUS;x++)
+	{
+		naytto [y][x] = ((x % 2) ? b : a); 
+	}
+	matka++;
+}
 
 int main(void)
 {
 	
 	/* alusta laitteen komponentit */
 	alusta();
-	
+	sei();
+
 	while (1) {
-		
+	srand(TCNT1H <<8 | TCNT1L);
+		tayta_tie();
 		PORTA &= ~(1 << PA6);
 		lcd_write_ctrl(LCD_CLEAR);
 		vierita_nayttoa();
@@ -45,12 +73,21 @@ int main(void)
 		piirra_naytto();
 		_delay_ms(1000);
 		
-//		tarkista_napit();
 	}
 }
 
 void vierita_nayttoa()
 {
+	
+	if (e2.kohta < 15)
+	{
+		naytto [e2.kaista] [e2.kohta] = ' ';
+		e2.kohta++;
+	}
+	else 
+	{
+		e2.kohta = 0xFF;
+	}
 	if (ap.kohta < 15)
 	{
 		naytto [ap.kaista] [ap.kohta] = ' ';
@@ -61,6 +98,24 @@ void vierita_nayttoa()
 void piirra_naytto()
 {
 	int x,y;
+	switch (e2.tyyppi)
+	{
+		case 0:
+		e2.kaista = 0;
+		//o
+		break;
+		case 1:
+		//v
+		e2.kaista = 1;
+		break;
+		case 2:
+		//kummatkin
+		e2.kaista = 0;
+		naytto [1] [e2.kohta] =  '*';
+		break;
+	}
+	if (e2.kohta < 16)
+	naytto [e2.kaista] [e2.kohta] =  '*';
 	naytto [ap.kaista] [ap.kohta] = '<';
 	for (y=0;y<2;y++)
 	for (x=0;x<16;x++)
@@ -111,10 +166,10 @@ void alusta(void) {
 	/* salli keskeytys, jos ajastimen ja OCR1A rekisterin arvot ovat samat */
 	TIMSK |= (1 << OCIE1A);
 
-	/* asetetaan OCR1A rekisterin arvoksi 0x3e (~250hz) */
-	OCR1AH = 0x00;
-	OCR1AL = 0x13;
-	/* OCR1AL = 0x3e; */
+	/* asetetaan OCR1A rekisterin arvoksi 0x3d09 (Keskeytys kerran sekunnissa) */
+	OCR1AH = 0x3d;
+	OCR1AL = 0x09;
+	
 
 	/* käynnistä ajastin ja käytä kellotaajuutena (16 000 000 / 1024) Hz */
 	TCCR1B |= (1 << CS12) | (1 << CS10);
@@ -175,7 +230,17 @@ void tarkista_napit()
 }
 
 ISR(TIMER1_COMPA_vect) {
-
+	
+	este++;
+	
+	if (este == 8)
+	{
+		este =0;
+		e2.kaista = 0;
+		e2.kohta = 0;
+		e2.tyyppi = rand()%3; 
+		PORTA |= (1 << PA6);
+	}
 	/* vaihdetaan kaiutin pinnien tilat XOR operaatiolla */
 	PORTE ^= (1 << PE4) | (1 << PE5);
 }
