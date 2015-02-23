@@ -13,6 +13,7 @@ void piirra_naytto(void);
 
 #define LEVEYS (2)
 #define PITUUS (16)
+#define NAPPIMAARA 4
 
 char naytto [LEVEYS] [PITUUS]= {
 	{' ','_',' ','_',' ','_',' ','_',' ','_',' ','_',' ','_',' ','_'},
@@ -21,15 +22,22 @@ char naytto [LEVEYS] [PITUUS]= {
 };
 
 
+// custom char 0x0, 0x1b, 0x1e, 0xf, 0x1e, 0x1b, 0x0, 0x0
+
 typedef struct autopositio {
 	int kaista;
 	int kohta;
 } autopositio;
 
+enum ETyyppi {
+				oikea = 0,
+				vasen,
+				molemmat };
+
 typedef struct Este {
 	int kaista;
 	int kohta;
-	int tyyppi;} Este;
+	enum ETyyppi tyyppi;} Este;
 
 autopositio ap = {0,15};
 int nakyy = 0;
@@ -37,7 +45,7 @@ int matka = 0;
 volatile int este=0;
 volatile Este e2 = {0xFF,0xFF,0xFF};
 
-void tayta_tie(void)
+/*void tayta_tie(void)
 {
 	char a='_';
 	char b=' ';
@@ -54,19 +62,23 @@ void tayta_tie(void)
 		naytto [y][x] = ((x % 2) ? b : a); 
 	}
 	matka++;
-}
+}*/
 
 int main(void)
 {
 	
 	/* alusta laitteen komponentit */
 	alusta();
+	/* Enabloi interruptit */
 	sei();
 
 	while (1) {
-	srand(TCNT1H <<8 | TCNT1L);
-		tayta_tie();
+		// Hae satunnaissiemenluku timer countterista
+		srand(TCNT1H <<8 | TCNT1L);
+		//tayta_tie();
+		// Ledi pois päältä
 		PORTA &= ~(1 << PA6);
+		//Tyhjennä näyttö
 		lcd_write_ctrl(LCD_CLEAR);
 		vierita_nayttoa();
 		tarkista_napit();
@@ -79,20 +91,24 @@ int main(void)
 void vierita_nayttoa()
 {
 	
-	if (e2.kohta < 15)
+	if (e2.kohta < 16)
 	{
 		naytto [e2.kaista] [e2.kohta] = ' ';
+		if (e2.tyyppi == molemmat)
+			naytto [e2.kaista+1] [e2.kohta] = ' ';
 		e2.kohta++;
 	}
 	else 
 	{
 		e2.kohta = 0xFF;
 	}
-	if (ap.kohta < 15)
+	/* EI AUTON Vieritystä
+
+	 if (ap.kohta < 15)
 	{
 		naytto [ap.kaista] [ap.kohta] = ' ';
 		ap.kohta++;
-	}
+	}*/
 }
 
 void piirra_naytto()
@@ -100,18 +116,19 @@ void piirra_naytto()
 	int x,y;
 	switch (e2.tyyppi)
 	{
-		case 0:
+		case oikea:
 		e2.kaista = 0;
 		//o
 		break;
-		case 1:
+		case vasen:
 		//v
 		e2.kaista = 1;
 		break;
-		case 2:
+		case molemmat:
 		//kummatkin
 		e2.kaista = 0;
-		naytto [1] [e2.kohta] =  '*';
+		if (e2.kohta < 16)
+			naytto [1] [e2.kohta] =  '*';
 		break;
 	}
 	if (e2.kohta < 16)
@@ -141,6 +158,9 @@ void liikuta_autoa(int i)
 		ap.kohta = ( ((ap.kohta-2) >= 0) ? (ap.kohta-2) : 0);
 		break;
 		case 2:
+		ap.kohta = ( ((ap.kohta+1) <= (PITUUS-1) ) ? (ap.kohta+1) : ap.kohta);
+		break;
+		case 3:
 		ap.kaista = (ap.kaista ? 1 : (ap.kaista+1));
 		break;
 	}
@@ -177,6 +197,7 @@ void alusta(void) {
 	/* näppäin pinnit sisääntuloksi */
 	DDRA &= ~(1 << PA0);
 	DDRA &= ~(1 << PA2);
+	DDRA &= ~(1 << PA3);
 	DDRA &= ~(1 << PA4);
 
 	/* rele/led pinni ulostuloksi */
@@ -193,7 +214,7 @@ void alusta(void) {
 void tarkista_napit()
 {
 	unsigned int masked;
-	const int taulu[] = { 1,4,16 }; /* 0001 0101 */
+	const int taulu[] = { 1,4,8,16 }; /* 0001 0101 */
 
 	// Zero everything above 5 lowest bits
 	masked = PINA & 31;
@@ -201,7 +222,7 @@ void tarkista_napit()
 	masked = ~(masked);
 
 	int i;
-	for (i=0;i<3;i++)
+	for (i=0;i<NAPPIMAARA;i++)
 	{
 		if (taulu[i] & masked)
 		{
@@ -219,6 +240,11 @@ void tarkista_napit()
 			liikuta_autoa(i);
 			break;
 			case 2:
+			//Taaksepäin
+			PORTA |= (1 << PA6);
+			liikuta_autoa(i);
+			break;
+			case 3:
 			//Vasemmalle kaistalle
 			PORTA |= (1 << PA6);
 			liikuta_autoa(i);
