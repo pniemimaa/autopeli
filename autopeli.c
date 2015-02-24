@@ -22,8 +22,6 @@ char naytto [LEVEYS] [PITUUS]= {
 };
 
 
-// custom char 0x0, 0x1b, 0x1e, 0xf, 0x1e, 0x1b, 0x0, 0x0
-
 typedef struct autopositio {
 	int kaista;
 	int kohta;
@@ -73,6 +71,10 @@ int main(void)
 	sei();
 
 	while (1) {
+	#if 0
+	lcd_gotoxy(0,0);
+	lcd_write_string("Alkuteksti");
+	#endif
 		// Hae satunnaissiemenluku timer countterista
 		srand(TCNT1H <<8 | TCNT1L);
 		//tayta_tie();
@@ -271,3 +273,12 @@ ISR(TIMER1_COMPA_vect) {
 	PORTE ^= (1 << PE4) | (1 << PE5);
 }
 
+void lcd_write_string(const char * const thestring)
+{
+	int i=0, string_size = strlen(thestring);
+	while (i< string_size)
+	{
+		lcd_write_data(thestring[i]);
+		i++;
+	}
+}
