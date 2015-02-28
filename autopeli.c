@@ -39,7 +39,7 @@ typedef struct Este {
 
 autopositio ap = {0,15};
 int nakyy = 0;
-int matka = 0;
+volatile int matka = 0;
 volatile int este=0;
 volatile Este e2 = {0xFF,0xFF,0xFF};
 
@@ -82,14 +82,42 @@ int main(void)
 		PORTA &= ~(1 << PA6);
 		//Tyhjennä näyttö
 		lcd_write_ctrl(LCD_CLEAR);
-		vierita_nayttoa();
+		//vierita_nayttoa();
 		tarkista_napit();
 		piirra_naytto();
+		tarkista_osuma();
 		_delay_ms(1000);
 		
 	}
 }
 
+void tarkista_osuma()
+{
+	int osuma = 0;
+	char ajettu[16];
+	if (e2.kohta == ap.kohta)
+	{
+		if (e2.tyyppi == molemmat)
+			osuma = 1;
+		else if (e2.kaista == ap.kaista)
+			osuma = 1;
+	}
+	
+	if (osuma)
+	{
+	//Disabloi interruptit
+	cli();
+	//sytytä Ledi
+	PORTA |= (1<<PA6);
+	//Näytön tyhjennys ja lopputuloksen kirjoitus
+	lcd_write_ctrl(LCD_CLEAR);
+	lcd_gotoxy(0,0);
+	lcd_write_string("Peli loppui...");
+	lcd_gotoxy(0,1);
+	sprintf(ajettu,"Matka: %d",matka);
+	lcd_write_string(ajettu);
+	}
+}
 void vierita_nayttoa()
 {
 	
@@ -259,9 +287,11 @@ void tarkista_napit()
 
 ISR(TIMER1_COMPA_vect) {
 	
+	vierita_nayttoa();
+	matka++;
 	este++;
 	
-	if (este == 8)
+	if (este == 16)
 	{
 		este =0;
 		e2.kaista = 0;
