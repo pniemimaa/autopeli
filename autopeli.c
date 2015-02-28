@@ -10,6 +10,8 @@
 void tarkista_napit(void);
 void alusta(void);
 void piirra_naytto(void);
+void tarkista_tormays(void);
+
 
 #define LEVEYS (2)
 #define PITUUS (16)
@@ -43,7 +45,7 @@ int matka = 0;
 volatile int este=0;
 volatile Este e2 = {0xFF,0xFF,0xFF};
 
-/*void tayta_tie(void)
+void tayta_tie(void)
 {
 	char a='_';
 	char b=' ';
@@ -60,7 +62,7 @@ volatile Este e2 = {0xFF,0xFF,0xFF};
 		naytto [y][x] = ((x % 2) ? b : a); 
 	}
 	matka++;
-}*/
+}
 
 int main(void)
 {
@@ -68,16 +70,17 @@ int main(void)
 	/* alusta laitteen komponentit */
 	alusta();
 	/* Enabloi interruptit */
-	sei();
+	//sei();
 
 	while (1) {
-	#if 0
+	
 	lcd_gotoxy(0,0);
 	lcd_write_string("Alkuteksti");
-	#endif
+	//#if 0
+	
 		// Hae satunnaissiemenluku timer countterista
 		srand(TCNT1H <<8 | TCNT1L);
-		//tayta_tie();
+		tayta_tie();
 		// Ledi pois päältä
 		PORTA &= ~(1 << PA6);
 		//Tyhjennä näyttö
@@ -86,13 +89,24 @@ int main(void)
 		tarkista_napit();
 		piirra_naytto();
 		_delay_ms(1000);
-		
+		//#endif
 	}
 }
-
+void tarkista_tormays()
+//Tarkistetaan onko este samassa paikassa kuin auto
+{
+    if(ap.kaista==e2.kaista && ap.kohta==e2.kohta)
+    {
+        //Valomerkki jos on
+    	PORTA |= (1 << PA6);
+		_delay_ms(2000);
+		PORTA &= ~(1 << PA6);
+    }
+}
 void vierita_nayttoa()
 {
-	
+	tarkista_tormays();
+		
 	if (e2.kohta < 16)
 	{
 		naytto [e2.kaista] [e2.kohta] = ' ';
@@ -155,15 +169,19 @@ void liikuta_autoa(int i)
 	{
 		case 0:
 		ap.kaista = (ap.kaista ? (ap.kaista-1) : 0);
+		tarkista_tormays();
 		break;
 		case 1:
 		ap.kohta = ( ((ap.kohta-2) >= 0) ? (ap.kohta-2) : 0);
+		tarkista_tormays();
 		break;
 		case 2:
 		ap.kohta = ( ((ap.kohta+1) <= (PITUUS-1) ) ? (ap.kohta+1) : ap.kohta);
+		tarkista_tormays();
 		break;
 		case 3:
 		ap.kaista = (ap.kaista ? 1 : (ap.kaista+1));
+		tarkista_tormays();
 		break;
 	}
 }
