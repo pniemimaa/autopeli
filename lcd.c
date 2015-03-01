@@ -2,6 +2,7 @@
 
 #include <avr/io.h>
 #include <util/delay.h>
+#include <string.h>
 #include "lcd.h"
 
 static void write_nibble(int, int);
@@ -110,3 +111,14 @@ void lcd_gotoxy (unsigned char x, unsigned char y)
 
 }
 
+// Write complete string to LCD
+void lcd_write_string(const char * const thestring)
+{
+	int i=0, string_size = strlen(thestring);
+	
+	while (i< string_size)
+	{
+		lcd_write_data(thestring[i]);
+		i++;
+	}
+}
