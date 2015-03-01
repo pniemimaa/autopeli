@@ -20,6 +20,7 @@ void lcd_init(void);
 void lcd_write(int, int);
 int lcd_read(int);
 void lcd_gotoxy (unsigned char, unsigned char);
+void lcd_write_string(const char * const);
 
 /* macros to read/write control/data registers */
 #define lcd_write_ctrl(v) lcd_write(v,0)
