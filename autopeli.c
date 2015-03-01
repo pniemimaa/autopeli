@@ -14,6 +14,8 @@ void piirra_naytto(void);
 int tarkista_osuma(void);
 void vierita_nayttoa(void);
 void liikuta_autoa(int);
+void tayta_tie(void);
+void resetoi_peliarvot(void);
 
 
 //Makrot
@@ -102,6 +104,8 @@ typedef struct Este {
 
 		}
 	}
+
+	/* Funktiot */
     void resetoi_peliarvot(void)
 	{
 		ap.kaista = 0;
@@ -148,6 +152,7 @@ typedef struct Este {
 		}
 		return TRUE;
 	}
+
 	void vierita_nayttoa()
 	{
 
@@ -311,6 +316,25 @@ typedef struct Este {
 
 	}
 
+	void tayta_tie(void)
+	{
+		char a='_';
+		char b=' ';
+		int y,x;
+
+		if (matka % 2)
+		{
+			a=' ';
+			b='_';
+		}
+		for (y=0;y<LEVEYS;y++)
+			for (x=0;x<PITUUS;x++)
+			{
+				naytto [y][x] = ((x % 2) ? b : a);
+			}
+	}
+	/* Keskeytysrutiinit */
+
 	ISR(TIMER1_COMPA_vect) {
 
 		vierita_nayttoa();
@@ -329,21 +353,3 @@ typedef struct Este {
 		/* vaihdetaan kaiutin pinnien tilat XOR operaatiolla */
 		PORTE ^= (1 << PE4) | (1 << PE5);
 	}
-
-void tayta_tie(void)
-{
-       char a='_';
-       char b=' ';
-       int y,x;
-
-       if (matka % 2)
-       {
-               a=' ';
-               b='_';
-       }
-       for (y=0;y<LEVEYS;y++)
-       for (x=0;x<PITUUS;x++)
-       {
-               naytto [y][x] = ((x % 2) ? b : a);
-       }
-}
