@@ -256,7 +256,8 @@ void vierita_nayttoa()
 		}
 		if (e2.kohta < 16)
 			naytto [e2.kaista] [e2.kohta] =  '*';
-		naytto [ap.kaista] [ap.kohta] = '<';
+		//naytto [ap.kaista] [ap.kohta] = '<';
+		naytto [ap.kaista] [ap.kohta] = 0;
 		for (y=0;y<2;y++)
 			for (x=0;x<16;x++)
 			{
@@ -352,7 +353,27 @@ void vierita_nayttoa()
 		lcd_write_ctrl(LCD_ON);
 		lcd_write_ctrl(LCD_CLEAR);
 
-
+	   /* Talleta kaksi eri auton grafiikkaa CGRAM positioon 0 ja 1*/
+		int pos = 0;
+		lcd_write_ctrl(0x40 + (8*pos));
+		lcd_write_data(0);
+		lcd_write_data(0);
+		lcd_write_data(9);
+		lcd_write_data(31);
+		lcd_write_data(31);
+		lcd_write_data(9);
+		lcd_write_data(0);
+		lcd_write_data(0);
+		pos++;
+		lcd_write_ctrl(0x40 + (8*pos));
+		lcd_write_data(0);
+		lcd_write_data(0);
+		lcd_write_data(17);
+		lcd_write_data(14);
+		lcd_write_data(14);
+		lcd_write_data(17);
+		lcd_write_data(0);
+		lcd_write_data(0);
 	}
 
 	void tarkista_napit()
