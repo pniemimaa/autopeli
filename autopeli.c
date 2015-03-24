@@ -11,16 +11,11 @@
 void tarkista_napit(void);
 void alusta(void);
 void piirra_naytto(void);
-<<<<<<< HEAD
-void tarkista_tormays(void);
-
-=======
 int tarkista_osuma(void);
 void vierita_nayttoa(void);
 void liikuta_autoa(int);
 void tayta_tie(void);
 void resetoi_peliarvot(void);
->>>>>>> origin/master
 
 
 //Makrot
@@ -62,14 +57,6 @@ typedef struct Este {
 	int peli_paalla = FALSE;
 
 
-<<<<<<< HEAD
-void tayta_tie(void)
-{
-	char a='_';
-	char b=' ';
-	int y,x;
-=======
->>>>>>> origin/master
 
 	int main(void)
 	{
@@ -121,57 +108,6 @@ void tayta_tie(void)
 	/* Funktiot */
     void resetoi_peliarvot(void)
 	{
-<<<<<<< HEAD
-		naytto [y][x] = ((x % 2) ? b : a); 
-	}
-	matka++;
-}
-
-int main(void)
-{
-	
-	/* alusta laitteen komponentit */
-	alusta();
-	/* Enabloi interruptit */
-	//sei();
-
-	while (1) {
-	
-	lcd_gotoxy(0,0);
-	lcd_write_string("Alkuteksti");
-	//#if 0
-	
-		// Hae satunnaissiemenluku timer countterista
-		srand(TCNT1H <<8 | TCNT1L);
-		tayta_tie();
-		// Ledi pois päältä
-		PORTA &= ~(1 << PA6);
-		//Tyhjennä näyttö
-		lcd_write_ctrl(LCD_CLEAR);
-		vierita_nayttoa();
-		tarkista_napit();
-		piirra_naytto();
-		_delay_ms(1000);
-		//#endif
-	}
-}
-void tarkista_tormays()
-//Tarkistetaan onko este samassa paikassa kuin auto
-{
-    if(ap.kaista==e2.kaista && ap.kohta==e2.kohta)
-    {
-        //Valomerkki jos on
-    	PORTA |= (1 << PA6);
-		_delay_ms(2000);
-		PORTA &= ~(1 << PA6);
-    }
-}
-void vierita_nayttoa()
-{
-	tarkista_tormays();
-		
-	if (e2.kohta < 16)
-=======
 		ap.kaista = 0;
 		ap.kohta = (PITUUS-1);
 		nakyy = FALSE;
@@ -186,7 +122,6 @@ void vierita_nayttoa()
 	}
 
 	int tarkista_osuma()
->>>>>>> origin/master
 	{
 		int osuma = FALSE;
 		char ajettu[16];
@@ -276,23 +211,6 @@ void vierita_nayttoa()
 		switch(i)
 		{
 		case 0:
-<<<<<<< HEAD
-		ap.kaista = (ap.kaista ? (ap.kaista-1) : 0);
-		tarkista_tormays();
-		break;
-		case 1:
-		ap.kohta = ( ((ap.kohta-2) >= 0) ? (ap.kohta-2) : 0);
-		tarkista_tormays();
-		break;
-		case 2:
-		ap.kohta = ( ((ap.kohta+1) <= (PITUUS-1) ) ? (ap.kohta+1) : ap.kohta);
-		tarkista_tormays();
-		break;
-		case 3:
-		ap.kaista = (ap.kaista ? 1 : (ap.kaista+1));
-		tarkista_tormays();
-		break;
-=======
 			ap.kaista = (ap.kaista ? (ap.kaista-1) : 0);
 			break;
 		case 1:
@@ -305,7 +223,6 @@ void vierita_nayttoa()
 			ap.kaista = (ap.kaista ? 1 : (ap.kaista+1));
 			break;
 		}
->>>>>>> origin/master
 	}
 
 	void alusta(void) {
