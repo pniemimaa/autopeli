@@ -72,7 +72,7 @@ typedef struct Este {
 			lcd_gotoxy(0,0);
 			lcd_write_string("Alkuteksti");
 #endif
-			
+		
 			if (peli_paalla == FALSE)
 			{
 			
@@ -271,26 +271,18 @@ typedef struct Este {
 		lcd_write_ctrl(LCD_CLEAR);
 
 	   /* Talleta kaksi eri auton grafiikkaa CGRAM positioon 0 ja 1*/
-		int pos = 0;
-		lcd_write_ctrl(0x40 + (8*pos));
-		lcd_write_data(0);
-		lcd_write_data(0);
-		lcd_write_data(9);
-		lcd_write_data(31);
-		lcd_write_data(31);
-		lcd_write_data(9);
-		lcd_write_data(0);
-		lcd_write_data(0);
-		pos++;
-		lcd_write_ctrl(0x40 + (8*pos));
-		lcd_write_data(0);
-		lcd_write_data(0);
-		lcd_write_data(17);
-		lcd_write_data(14);
-		lcd_write_data(14);
-		lcd_write_data(17);
-		lcd_write_data(0);
-		lcd_write_data(0);
+		const char auto_grafiikat [2] [8] = {
+				{0,0,9,31,31,9,0,0},
+				{0,0,17,14,14,17,0,0} };
+		int i,j;
+		for (i=0;i<2;i++)
+		{
+			lcd_write_ctrl(0x40 + (8*i));
+			for (j=0;j<8;j++)
+			{
+				lcd_write_data(auto_grafiikat[i][j]);
+			}
+		}
 	}
 
 	void tarkista_napit()
