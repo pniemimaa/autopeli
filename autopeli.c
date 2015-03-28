@@ -68,19 +68,15 @@ typedef struct Este {
 
 		/* alusta laitteen komponentit */
 		alusta();
-		/* Enabloi interruptit */
-		sei();
-		peli_paalla = TRUE;
 
+		peli_paalla = FALSE;
+		lcd_gotoxy(0,0);
+		lcd_write_string("Aloita peli ->");
+		
 		while (1) {
-#if 0
-			lcd_gotoxy(0,0);
-			lcd_write_string("Alkuteksti");
-#endif
 		
 			if (peli_paalla == FALSE)
 			{
-			
 				// Resetoi peli kun nappia B2 painetaan
 				while (1)
 				{
@@ -206,14 +202,12 @@ typedef struct Este {
 				lcd_write_data(naytto[y][x]);
 
 			}
-
-
 	}
 
 	void liikuta_autoa(int i)
 	{
 		//tyhj‰‰ ed paikka
-		naytto [ap.kaista] [ap.kohta] = ' ';
+		naytto [ap.kaista] [ap.kohta] = (ap.kohta % 2 ==0) ? ' ' : '_' ; 
 		switch(i)
 		{
 		case 0:
