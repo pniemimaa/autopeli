@@ -59,7 +59,7 @@ typedef struct Este {
 	volatile int este=0;
 	volatile Este e2 = {0xFF,0xFF,0xFF};
 	int peli_paalla = FALSE;
-	int hyppy = 0;
+	volatile int hyppy = 0;
 
 
 
@@ -194,7 +194,7 @@ typedef struct Este {
 			naytto [e2.kaista] [e2.kohta] =  '*';
 		
 		naytto [ap.kaista] [ap.kohta] = (hyppy ? BM_HYPPY :BM_AUTO);
-		hyppy = 0;
+		
 		for (y=0;y<2;y++)
 			for (x=0;x<PITUUS;x++)
 			{
@@ -273,9 +273,22 @@ typedef struct Este {
 
 	   /* Talleta kaksi eri auton grafiikkaa CGRAM positioon 0 ja 1*/
 		const char auto_grafiikat [2] [BITMAP_KOKO] = {
-				{0,0,9,31,31,9,0,0},
-				{0,0,17,14,14,17,0,0} };
-		
+				{
+					0b00000000,
+					0b00000000,
+					0b00001001,
+					0b00011111,
+					0b00011111,
+					0b00001001,
+					0b00000000,
+					0b00000000
+				},
+				{
+					0, 9, 6, 31, 31, 6, 9, 0
+				} 
+				};
+	
+
 		int positio,j;
 		for (positio=0;positio<2;positio++)
 		{
@@ -368,10 +381,10 @@ typedef struct Este {
 
 		vierita_nayttoa();
 		tayta_tie();
-		matkamittari();
 		matka++;
+		matkamittari();
 		este++;
-
+		hyppy = 0;
 		if ((matka % 16)==0)
 		{
 			este =0;
