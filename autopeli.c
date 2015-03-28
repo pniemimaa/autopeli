@@ -22,8 +22,12 @@ void resetoi_peliarvot(void);
 #define TRUE       1
 #define FALSE      0
 #define NAPPIMAARA 4
+#define BITMAP_KOKO 8
 #define LEVEYS     (2)
 #define PITUUS     (16)
+/* Kustomoidut grafiikat */
+#define BM_AUTO    0
+#define BM_HYPPY   1
 
 #define B2_NAPPI_YLHAALLA (PINA & (1 << PA1))
 
@@ -55,6 +59,7 @@ typedef struct Este {
 	volatile int este=0;
 	volatile Este e2 = {0xFF,0xFF,0xFF};
 	int peli_paalla = FALSE;
+	int hyppy = 0;
 
 
 
@@ -124,7 +129,7 @@ typedef struct Este {
 	int tarkista_osuma()
 	{
 		int osuma = FALSE;
-		char ajettu[16];
+		char ajettu[PITUUS];
 		if (e2.kohta == ap.kohta)
 		{
 			if (e2.tyyppi == molemmat)
@@ -156,7 +161,7 @@ typedef struct Este {
 	void vierita_nayttoa()
 	{
 
-		if (e2.kohta < 16)
+		if (e2.kohta < PITUUS)
 		{
 			naytto [e2.kaista] [e2.kohta] = ' ';
 			if (e2.tyyppi == molemmat)
@@ -191,10 +196,11 @@ typedef struct Este {
 		}
 		if (e2.kohta < 16)
 			naytto [e2.kaista] [e2.kohta] =  '*';
-		//naytto [ap.kaista] [ap.kohta] = '<';
-		naytto [ap.kaista] [ap.kohta] = 0;
+		
+		naytto [ap.kaista] [ap.kohta] = (hyppy ? BM_HYPPY :BM_AUTO);
+		hyppy = 0;
 		for (y=0;y<2;y++)
-			for (x=0;x<16;x++)
+			for (x=0;x<PITUUS;x++)
 			{
 				lcd_gotoxy(x,y);
 				lcd_write_data(naytto[y][x]);
@@ -214,6 +220,7 @@ typedef struct Este {
 			ap.kaista = (ap.kaista ? (ap.kaista-1) : 0);
 			break;
 		case 1:
+			hyppy = TRUE;
 			ap.kohta = ( ((ap.kohta-2) >= 0) ? (ap.kohta-2) : 0);
 			break;
 		case 2:
@@ -271,16 +278,17 @@ typedef struct Este {
 		lcd_write_ctrl(LCD_CLEAR);
 
 	   /* Talleta kaksi eri auton grafiikkaa CGRAM positioon 0 ja 1*/
-		const char auto_grafiikat [2] [8] = {
+		const char auto_grafiikat [2] [BITMAP_KOKO] = {
 				{0,0,9,31,31,9,0,0},
 				{0,0,17,14,14,17,0,0} };
-		int i,j;
-		for (i=0;i<2;i++)
+		
+		int positio,j;
+		for (positio=0;positio<2;positio++)
 		{
-			lcd_write_ctrl(0x40 + (8*i));
+			lcd_write_ctrl(0x40 + (BITMAP_KOKO*positio));
 			for (j=0;j<8;j++)
 			{
-				lcd_write_data(auto_grafiikat[i][j]);
+				lcd_write_data(auto_grafiikat[positio][j]);
 			}
 		}
 	}
