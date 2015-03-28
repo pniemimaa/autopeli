@@ -345,15 +345,30 @@ typedef struct Este {
 		for (y=0;y<LEVEYS;y++)
 			for (x=0;x<PITUUS;x++)
 			{
+				/* Skippaa matkamittari */
+				if (y==0)
+					if ((x >=0) && (x < 4))
+						continue;
 				naytto [y][x] = ((x % 2) ? b : a);
 			}
 	}
+	void matkamittari()
+	{
+		char buf[6];
+		sprintf(buf,"%04d",matka);
+		int i =0;
+		while (i<4)
+		{
+			naytto [0] [i] = buf [i];
+			i++;
+		}
+	}
 	/* Keskeytysrutiinit */
-
 	ISR(TIMER1_COMPA_vect) {
 
 		vierita_nayttoa();
 		tayta_tie();
+		matkamittari();
 		matka++;
 		este++;
 
