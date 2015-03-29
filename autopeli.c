@@ -60,6 +60,7 @@ typedef struct Este {
 	volatile Este e2 = {0xFF,0xFF,0xFF};
 	int peli_paalla = FALSE;
 	volatile int hyppy = 0;
+	int rekkari;
 
 
 
@@ -95,12 +96,10 @@ typedef struct Este {
 
 			// Ledi pois päältä
 			PORTA &= ~(1 << PA6);
-			//Tyhjennä näyttö
-			lcd_write_ctrl(LCD_CLEAR);
 			tarkista_napit();
-			piirra_naytto();
 			peli_paalla=tarkista_osuma();
-			_delay_ms(1000);
+			
+			_delay_ms(800);
 			}
 
 		}
@@ -118,6 +117,8 @@ typedef struct Este {
 		e2.kohta = 0xFF;
 		e2.tyyppi = 0xFF;
 		peli_paalla = TRUE;
+		OCR1AH = 0x3d;
+		OCR1AL = 0x09;
 		lcd_write_ctrl(LCD_CLEAR);	
 		sei();
 	}
@@ -395,4 +396,25 @@ typedef struct Este {
 		}
 		/* vaihdetaan kaiutin pinnien tilat XOR operaatiolla */
 		PORTE ^= (1 << PE4) | (1 << PE5);
+		rekkari = (OCR1AH << 8) | OCR1AL;
+		
+		if (matka < 50)
+			rekkari -= 200;
+		else if (matka % 50 == 0)
+			rekkari -= 100;
+		else if (matka < 145)
+			rekkari -= 10;
+		else if (matka < 200)
+			rekkari -= 5;
+		else
+			rekkari -= 1;
+
+		if (rekkari < 0)
+			rekkari = 0;
+		OCR1AH = (rekkari >>8);
+		OCR1AL = rekkari;
+		//Tyhjennä näyttö
+		lcd_write_ctrl(LCD_CLEAR);
+		piirra_naytto();
 	}
+
