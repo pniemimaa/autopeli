@@ -385,7 +385,6 @@ typedef struct Este {
 		matka++;
 		matkamittari();
 		este++;
-		hyppy = 0;
 		if ((matka % 16)==0)
 		{
 			este =0;
@@ -416,5 +415,6 @@ typedef struct Este {
 		//Tyhjennä näyttö
 		lcd_write_ctrl(LCD_CLEAR);
 		piirra_naytto();
+		hyppy = 0;
 	}
 
